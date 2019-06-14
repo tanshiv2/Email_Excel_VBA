@@ -1,0 +1,59 @@
+' Variables in the code will be assigned explicitly
+Option Explicit
+
+' Start Sub, initialize worksheet as variable with Sheet
+Sub Send_Multiple_Email()
+Dim sh As Worksheet
+Set sh = ThisWorkbook.Sheets("Sheet1")
+
+' Initialize variables for message and outlook application
+Dim OA As Object
+Dim msg As Object
+
+Set OA = CreateObject("Outlook.Application")
+
+Dim i As Integer
+Dim last_row As Integer
+
+' Variables to store data in long for comparison
+Dim EndDate As Date
+Dim EndDate1 As Long
+Dim Today As Date
+Dim Today1 As Long
+
+last_row = Application.WorksheetFunction.CountA(sh.Range("A:A"))
+
+' Loop to run till last record/row
+For i = 2 To last_row
+
+EndDate = Cells(i, 11).Value
+EndDate1 = EndDate
+Today = Date
+Today1 = Today
+' i = row number and 27 = column number where date for password expiration is stored
+Cells(i, 12) = EndDate1
+Cells(i, 13) = EndDate1 - Today1
+' Check if expiration data is in less than 5 days from today
+If EndDate1 - Today1 <= 5 Then
+If EndDate1 - Today1 >= 0 Then
+' message as outlook application item
+Set msg = OA.CreateItem(0)
+msg.To = Cells(i, 5).Value
+msg.CC = "shivangi.tanwar@lionresources.com"
+msg.Subject = "Password Expiration"
+msg.Body = " Hi " & Cells(i, 4).Value & "," & vbNewLine & " your password for " & Cells(i, 3).Value & " expires in the next " & Cells(i, 13).Value & " days." & vbNewLine & vbNewLine & "Thanks," & vbNewLine & "XYZ ABC."
+msg.Send
+End If
+End If
+
+Next i
+
+MsgBox "Mails sent"
+
+End Sub
+
+
+
+
+
+
