@@ -2,7 +2,7 @@
 Option Explicit
 
 ' Start Sub, initialize worksheet as variable with Sheet
-Sub Send_mails()
+Sub Auto_run()
 Dim sh As Worksheet
 Set sh = ThisWorkbook.Sheets("Sheet1")
 
