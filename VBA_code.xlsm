@@ -2,7 +2,7 @@
 Option Explicit
 
 ' Start Sub, initialize worksheet as variable with Sheet
-Sub Send_Multiple_Email()
+Sub Send_mails()
 Dim sh As Worksheet
 Set sh = ThisWorkbook.Sheets("Sheet1")
 
@@ -12,6 +12,7 @@ Dim msg As Object
 
 Set OA = CreateObject("Outlook.Application")
 
+' Variables to store data for iterations
 Dim i As Integer
 Dim last_row As Integer
 
@@ -20,40 +21,59 @@ Dim EndDate As Date
 Dim EndDate1 As Long
 Dim Today As Date
 Dim Today1 As Long
+Dim DaysLeft As Long
 
 last_row = Application.WorksheetFunction.CountA(sh.Range("A:A"))
 
 ' Loop to run till last record/row
 For i = 2 To last_row
 
+' i = row number & 11 = column number where date for password expiration is stored
 EndDate = Cells(i, 11).Value
 EndDate1 = EndDate
 Today = Date
 Today1 = Today
-' i = row number and 27 = column number where date for password expiration is stored
-Cells(i, 12) = EndDate1
-Cells(i, 13) = EndDate1 - Today1
-' Check if expiration data is in less than 5 days from today
+DaysLeft = EndDate1 - Today1
+
+' only run if enddate column is not null
+If EndDate1 <> 0 Then
+' only run if email column is not null
+If IsEmpty(Cells(i, 5).Value) = False Then
+'base condition, 5 days or less to expiration
 If EndDate1 - Today1 <= 5 Then
-If EndDate1 - Today1 >= 0 Then
-' message as outlook application item
+'1-5 days
+If EndDate1 - Today1 > 0 Then
 Set msg = OA.CreateItem(0)
 msg.To = Cells(i, 5).Value
-msg.CC = "shivangi.tanwar@lionresources.com"
+msg.CC = ""
 msg.Subject = "Password Expiration"
-msg.Body = " Hi " & Cells(i, 4).Value & "," & vbNewLine & " your password for " & Cells(i, 3).Value & " expires in the next " & Cells(i, 13).Value & " days." & vbNewLine & vbNewLine & "Thanks," & vbNewLine & "XYZ ABC."
+msg.Body = " Hi " & Cells(i, 4).Value & "," & vbNewLine & vbNewLine & " your password for " & Cells(i, 3).Value & " on server " & Cells(i, 2).Value & " expires in the next " & DaysLeft & " days." & vbNewLine & vbNewLine & "Thanks," & vbNewLine & "DBA team."
+msg.Send
+
+'already expired
+ElseIf EndDate1 - Today1 < 0 Then
+Set msg = OA.CreateItem(0)
+msg.To = Cells(i, 5).Value
+msg.CC = ""
+msg.Subject = "Password Expiration"
+msg.Body = " Hi " & Cells(i, 4).Value & "," & vbNewLine & vbNewLine & " your password for " & Cells(i, 3).Value & " on server " & Cells(i, 2).Value & " expired " & Abs(DaysLeft) & " days ago." & vbNewLine & vbNewLine & "Thanks," & vbNewLine & "DBA team."
+msg.Send
+
+'expires on the same day
+Else
+Set msg = OA.CreateItem(0)
+msg.To = Cells(i, 5).Value
+msg.CC = ""
+msg.Subject = "Password Expiration"
+msg.Body = " Hi " & Cells(i, 4).Value & "," & vbNewLine & vbNewLine & " your password for " & Cells(i, 3).Value & " on server " & Cells(i, 2).Value & " expires today." & vbNewLine & vbNewLine & "Thanks," & vbNewLine & "DBA team."
 msg.Send
 End If
 End If
-
+End If
+End If
+DaysLeft = 0
 Next i
 
 MsgBox "Mails sent"
 
 End Sub
-
-
-
-
-
-
